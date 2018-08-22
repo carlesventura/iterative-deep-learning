@@ -37,9 +37,6 @@ save_vertices_indxs = False
 # Setting other parameters
 nEpochs = 200  # Number of epochs for training
 numHGScales = 4  # How many times to downsample inside each HourGlass
-useVal = 1  # See evolution of the test set when training?
-testBatch = 1  # Testing Batch
-vis_net = 0  # Visualize your network?
 if 'SGE_GPU' in os.environ.keys():
     gpu_id = int(os.environ['SGE_GPU'])  # Select which GPU, -1 if CPU
     print('GPU:'+str(gpu_id))
