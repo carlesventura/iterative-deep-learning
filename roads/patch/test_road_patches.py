@@ -13,6 +13,12 @@ import json
 
 
 # Setting of parameters
+
+model_dir = './results_dir/'
+epoch = 130
+db_root_dir = model_dir + '/val_gt/'
+output_dir = model_dir + '/val_results/'
+
 # Parameters in p are used for the name of the model
 p = {}
 p['useRandom'] = 1  # Shuffle Images
@@ -27,19 +33,8 @@ p['GTmasks'] = 0 # Use GT Vessel Segmentations as input instead of Retinal Image
 
 # Setting other parameters
 numHGScales = 4  # How many times to downsample inside each HourGlass
-useTest = 1  # See evolution of the test set when training?
-nTestInterval = 10  # Run on test set every nTestInterval iterations
-#model_dir = '/scratch_net/boxy/carlesv/HourGlasses_experiments/roads/Iterative_margin_6/'
-model_dir = '/scratch_net/boxy/carlesv/HourGlasses_experiments/roads/Iterative_margin_6_200_epoches/'
 gpu_id = int(os.environ['SGE_GPU'])  # Select which GPU, -1 if CPU
-#gpu_id = - 1
-#epoch = 49
-epoch = 130
-
 modelName = tb.construct_name(p, "HourGlass")
-db_root_dir = '/scratch_net/boxy/carlesv/HourGlasses_experiments/roads/Iterative_margin_6/val_gt/'
-#output_dir = '/scratch_net/boxy/carlesv/HourGlasses_experiments/roads/Iterative_margin_6/val_results/'
-output_dir = '/scratch_net/boxy/carlesv/HourGlasses_experiments/roads/Iterative_margin_6_200_epoches/val_results/epoch_130/'
 
 # Define the Network and load the pre-trained weights as a CPU tensor
 net = nt.Net_SHG(p['numHG'], numHGScales, p['Block'], 128, 1)
@@ -53,9 +48,6 @@ for par in net.parameters():
 if gpu_id >= 0:
     torch.cuda.set_device(device=gpu_id)
     net.cuda()
-
-# Separate interactive testing
-vis_res = 0
 
 num_patches_per_image = 50
 num_images = 14
@@ -81,9 +73,6 @@ for jj in range(0,num_patches_per_image):
         img = img.unsqueeze(0)
 
         inputs = img / 255 - 0.5
-
-        #gt = Image.open(os.path.join(db_root_dir, 'img_%02d_patch_%02_gt.png' %(ii,jj)))
-        #gt = composed_transforms_test(gt)
 
         # Forward pass of the mini-batch
         inputs = Variable(inputs)
