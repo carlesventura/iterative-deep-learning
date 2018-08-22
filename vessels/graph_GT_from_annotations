@@ -1,0 +1,103 @@
+from PIL import Image
+import numpy as np
+import os
+import scipy.io as sio
+from bresenham import bresenham
+import scipy.misc
+
+#img_idx = 1
+all_vessels = False
+only_artery = False
+only_vein = True
+
+train = True
+
+if train:
+    start_img = 21
+    end_img = 40
+else:
+    start_img = 1
+    end_img = 20
+
+for img_idx in range(start_img,end_img+1):
+
+    root_dir = '/scratch_net/boxy/carlesv/gt_dbs/DRIVE/'
+    if train:
+        img = Image.open(os.path.join(root_dir, 'training', 'images', '%02d_training.tif' % img_idx))
+    else:
+        img = Image.open(os.path.join(root_dir, 'test', 'images', '%02d_test.tif' % img_idx))
+    #plt.imshow(img)
+    img_array = np.array(img, dtype=np.float32)
+    h, w = img_array.shape[:2]
+
+    if train:
+        mat_contents = sio.loadmat('/scratch_net/boxy/carlesv/artery-vein/AV-DRIVE/training/%02d_manual1.mat' %img_idx)
+    else:
+        mat_contents = sio.loadmat('/scratch_net/boxy/carlesv/artery-vein/AV-DRIVE/test/%02d_manual1.mat' %img_idx)
+    vertices = np.squeeze(mat_contents['G']['V'][0,0])-1
+    subscripts = np.squeeze(mat_contents['G']['subscripts'][0,0])-1
+
+    graph_gt_img = np.zeros((h,w))
+
+    if all_vessels:
+
+        for ii in range(0,len(subscripts)):
+
+            src_x = int(np.round(vertices[subscripts[ii,0],0]))
+            src_y = int(np.round(vertices[subscripts[ii,0],1]))
+
+            target_x = int(np.round(vertices[subscripts[ii,1],0]))
+            target_y = int(np.round(vertices[subscripts[ii,1],1]))
+
+            line = list(bresenham(src_x, src_y, target_x, target_y))
+            for kk in range(0,len(line)):
+                graph_gt_img[line[kk][1],line[kk][0]] = 1
+
+        if train:
+            scipy.misc.imsave('/scratch/carlesv/gt_dbs/DRIVE/training/graph_annotations/gt_graph_%02d_no_junctions.png' % img_idx, graph_gt_img)
+        else:
+            scipy.misc.imsave('/scratch/carlesv/gt_dbs/DRIVE/test/graph_annotations/gt_graph_%02d_no_junctions.png' % img_idx, graph_gt_img)
+
+    elif only_artery:
+
+        art = np.squeeze(mat_contents['G']['art'][0,0])
+        for ii in range(0,len(subscripts)):
+
+            if art[subscripts[ii,0]] == 1 and art[subscripts[ii,1]] == 1:
+
+                src_x = int(np.round(vertices[subscripts[ii,0],0]))
+                src_y = int(np.round(vertices[subscripts[ii,0],1]))
+
+                target_x = int(np.round(vertices[subscripts[ii,1],0]))
+                target_y = int(np.round(vertices[subscripts[ii,1],1]))
+
+                line = list(bresenham(src_x, src_y, target_x, target_y))
+                for kk in range(0,len(line)):
+                    graph_gt_img[line[kk][1],line[kk][0]] = 1
+
+        if train:
+            scipy.misc.imsave('/scratch/carlesv/gt_dbs/DRIVE/training/graph_annotations/gt_graph_%02d_artery.png' % img_idx, graph_gt_img)
+        else:
+            scipy.misc.imsave('/scratch/carlesv/gt_dbs/DRIVE/test/graph_annotations/gt_graph_%02d_artery.png' % img_idx, graph_gt_img)
+
+    else: #only_vein
+
+        ven = np.squeeze(mat_contents['G']['ven'][0,0])
+        for ii in range(0,len(subscripts)):
+
+            if ven[subscripts[ii,0]] == 1 and ven[subscripts[ii,1]] == 1:
+
+                src_x = int(np.round(vertices[subscripts[ii,0],0]))
+                src_y = int(np.round(vertices[subscripts[ii,0],1]))
+
+                target_x = int(np.round(vertices[subscripts[ii,1],0]))
+                target_y = int(np.round(vertices[subscripts[ii,1],1]))
+
+                line = list(bresenham(src_x, src_y, target_x, target_y))
+                for kk in range(0,len(line)):
+                    graph_gt_img[line[kk][1],line[kk][0]] = 1
+
+        if train:
+            scipy.misc.imsave('/scratch/carlesv/gt_dbs/DRIVE/training/graph_annotations/gt_graph_%02d_vein.png' % img_idx, graph_gt_img)
+        else:
+            scipy.misc.imsave('/scratch/carlesv/gt_dbs/DRIVE/test/graph_annotations/gt_graph_%02d_vein.png' % img_idx, graph_gt_img)
