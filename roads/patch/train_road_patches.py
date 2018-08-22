@@ -37,6 +37,8 @@ save_vertices_indxs = False
 # Setting other parameters
 nEpochs = 200  # Number of epochs for training
 numHGScales = 4  # How many times to downsample inside each HourGlass
+useVal = 1  # See evolution of the test set when training?
+nTestInterval = 1  # Run on test set every nTestInterval iterations
 if 'SGE_GPU' in os.environ.keys():
     gpu_id = int(os.environ['SGE_GPU'])  # Select which GPU, -1 if CPU
     print('GPU:'+str(gpu_id))
@@ -75,7 +77,9 @@ trainloader = DataLoader(db_train, batch_size=p['trainBatch'], shuffle=True)
 num_img_tr = len(trainloader)
 
 running_loss_tr = 0
+running_loss_val = 0
 loss_tr = []
+loss_val = []
 
 
 modelName = tbroads.construct_name(p, "HourGlass")
@@ -85,6 +89,7 @@ print("Training Network")
 
 file = open(save_dir + 'logfile.txt', 'a')
 file_training_loss = open(save_dir + 'training_loss.txt', 'a')
+file_validation_loss = open(save_dir + 'validation_loss.txt', 'a')
 
 # Main Training and Testing Loop
 for epoch in range(0, nEpochs):
@@ -132,8 +137,70 @@ for epoch in range(0, nEpochs):
     if (epoch % snapshot) == 0 and epoch != 0:
         torch.save(net.state_dict(), os.path.join(save_dir, modelName+'_epoch-'+str(epoch)+'.pth'))
 
+    # One testing epoch
+    if useVal:
+        if epoch % nTestInterval == (nTestInterval-1):
 
+            num_patches_per_image = 50
+            num_images = 14
+            num_img_val = num_patches_per_image*num_images
+
+            for jj in range(0,num_patches_per_image):
+                for ii in range(0,num_images):
+
+                    val_dir = save_dir + '/val_gt/'
+                    img = Image.open(os.path.join(val_dir, 'img_%02d_patch_%02d_img.png' %(ii+1,jj+1)))
+                    img = np.array(img, dtype=np.float32)
+
+                    if len(img.shape) == 2:
+                        image_tmp = img
+                        h, w = image_tmp.shape
+                        img = np.zeros((h, w, 3))
+                        img[:,:,0] = image_tmp
+                        img[:,:,1] = image_tmp
+                        img[:,:,2] = image_tmp
+                    img = img.transpose((2, 0, 1))
+                    img = torch.from_numpy(img)
+                    img = img.unsqueeze(0)
+
+                    inputs = img / 255 - 0.5
+
+                    gt = Image.open(os.path.join(val_dir, 'img_%02d_patch_%02d_gt.png' %(ii+1,jj+1)))
+                    gt = np.array(gt)
+                    if len(gt.shape) == 2:
+                        gt_tmp = gt
+                        h, w = gt_tmp.shape
+                        gt = np.zeros((h, w, 1), np.float32)
+                        gt[:,:,0] = gt_tmp
+
+                    gt = gt.transpose((2, 0, 1))
+                    gt = torch.from_numpy(gt)
+
+                    gt = Variable(gt)
+                    if gpu_id >= 0:
+                        gt = gt.cuda()
+
+                    # Forward pass of the mini-batch
+                    inputs = Variable(inputs)
+                    if gpu_id >= 0:
+                        inputs = inputs.cuda()
+
+                    output = net.forward(inputs)
+
+                    losses = [None] * p['numHG']
+                    for i in range(0, len(output)):
+                        losses[i] = criterion(output[i], gt)
+                    loss = sum(losses)
+
+                    running_loss_val += loss.data[0]
+                    if ii == num_images-1 and jj == num_patches_per_image-1:
+                        loss_val.append(running_loss_val/num_img_val)
+                        print('[%d, %5d] validation loss: %.5f' % (epoch+1, ii + 1, running_loss_val/num_img_val))
+                        file_validation_loss.write('[%d, %5d] validation loss: %.5f' % (epoch+1, num_img_val, running_loss_val/num_img_val))
+                        file_validation_loss.flush()
+                        running_loss_val = 0
 
 file.close()
 file_training_loss.close()
+file_validation_loss.close()
 
