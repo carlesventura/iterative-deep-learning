@@ -3,17 +3,19 @@ from torch.utils.data import DataLoader
 import scipy.misc
 import bifurcations_toolbox_roads as tbroads
 
+# save_dir parent directory (results_dir) should match with save_dir parameter from train_road_patches.py
+save_dir = './results_dir/gt_val/'
+db_root_dir = './gt_dbs/MassachusettsRoads/'
+
 p = {}
 p['inputRes'] = (64, 64)  # Input Resolution
 p['outputRes'] = (64, 64)  # Output Resolution (same as input)
 p['g_size'] = 64  # Higher means narrower Gaussian
 p['GTmasks'] = 0 # Use GT Vessel Segmentations as input instead of Retinal Images
-db_root_dir = '/scratch_net/boxy/carlesv/gt_dbs/MassachusettsRoads/'
+
 resultsOnTraining = False
 save_vertices_indxs = True
 load_vertices_indxs = False
-
-save_dir = '/scratch_net/boxy/carlesv/HourGlasses_experiments/roads/Iterative_margin_6/gt_val/'
 
 composed_transforms_test = tbroads.ToTensor()
 
