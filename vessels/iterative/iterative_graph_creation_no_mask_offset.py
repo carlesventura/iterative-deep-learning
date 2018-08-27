@@ -224,8 +224,6 @@ for img_idx in range(1,21):
 
     mask = np.zeros((h,w))
 
-    segments = []
-
     pending_connections_x = []
     pending_connections_y = []
     parent_connections_x = []
@@ -236,7 +234,6 @@ for img_idx in range(1,21):
     pending_connections_y.append(center[1])
     confidence_pending_connections.append(255)
     mask_graph = np.zeros((h,w))
-    segment_ids = np.zeros((h,w),int)
 
     parent_connections_x.append(center[0])
     parent_connections_y.append(center[1])
@@ -280,12 +277,9 @@ for img_idx in range(1,21):
 
 
             if len(pos_y_vector) > 0:
-                new_segment = []
                 for kk in range(0,len(pos_y_vector)):
                     mask_graph[pos_y_vector[kk]-offset:pos_y_vector[kk]+offset+1,pos_x_vector[kk]-offset:pos_x_vector[kk]+offset+1] = 1
                     mask[pos_y_vector[kk]-offset:pos_y_vector[kk]+offset+1,pos_x_vector[kk]-offset:pos_x_vector[kk]+offset+1] = 1
-                    new_segment.append(pos_y_vector[kk]*w+pos_x_vector[kk])
-                    segment_ids[pos_y_vector[kk],pos_x_vector[kk]] = count + 1
                 count += 1
                 segments.append(new_segment)
 
@@ -310,14 +304,10 @@ for img_idx in range(1,21):
                     break
 
             if len(pos_y_vector) > 0:
-                new_segment = []
                 for kk in range(0,len(pos_y_vector)):
                     mask_graph[pos_y_vector[kk]-offset:pos_y_vector[kk]+offset+1,pos_x_vector[kk]-offset:pos_x_vector[kk]+offset+1] = 1
                     mask[pos_y_vector[kk]-offset:pos_y_vector[kk]+offset+1,pos_x_vector[kk]-offset:pos_x_vector[kk]+offset+1] = 1
-                    new_segment.append(pos_y_vector[kk]*w+pos_x_vector[kk])
-                    segment_ids[pos_y_vector[kk],pos_x_vector[kk]] = count + 1
                 count += 1
-                segments.append(new_segment)
 
             if visualize_graph:
                 plt.imshow(img)
