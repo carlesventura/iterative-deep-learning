@@ -20,14 +20,14 @@ import os
 def generate_graph_center_roads(img_filename, center, gt_masks, vgg):
 
     if gt_masks:
-        results_dir_vessels = '/scratch_net/boxy/carlesv/gt_dbs/MassachusettsRoads/test/1st_manual/'
+        results_dir_vessels = './gt_dbs/MassachusettsRoads/test/1st_manual/'
         pred = Image.open(results_dir_vessels + img_filename[0:len(img_filename)-1])
     else:
         if vgg:
-            results_dir_vessels = '/scratch_net/boxy/kmaninis/road/Results_test_vgg_full-res/'
+            results_dir_vessels = './results_test_vgg/'
             pred = Image.open(results_dir_vessels + img_filename[:-4] + 'png')
         else:
-            results_dir_vessels = '/scratch_net/boxy/kmaninis/road/Old/Results_test_resnet/'
+            results_dir_vessels = './results_test_resnet/'
             pred = Image.open(results_dir_vessels + img_filename)
 
     pred = np.array(pred)
@@ -116,7 +116,7 @@ def get_most_confident_outputs(img_filename, patch_center_row, patch_center_col,
     confident_connections['y_peak'] = []
     confident_connections['peak_value'] = []
 
-    root_dir='/scratch_net/boxy/carlesv/gt_dbs/MassachusettsRoads/test/images/'
+    root_dir='./gt_dbs/MassachusettsRoads/test/images/'
     img = Image.open(os.path.join(root_dir, img_filename))
     img = np.array(img, dtype=np.float32)
     h, w = img.shape[:2]
@@ -134,10 +134,7 @@ def get_most_confident_outputs(img_filename, patch_center_row, patch_center_col,
         # Forward pass of the mini-batch
         inputs = Variable(inputs)
 
-        #gpu_id = int(os.environ['SGE_GPU'])  # Select which GPU, -1 if CPU
-        #gpu_id = -1
         if gpu_id >= 0:
-            #torch.cuda.set_device(device=gpu_id)
             inputs = inputs.cuda()
 
         p = {}
@@ -150,12 +147,10 @@ def get_most_confident_outputs(img_filename, patch_center_row, patch_center_col,
         p['numHG'] = 2  # Number of Stacked Hourglasses
         p['Block'] = 'ConvBlock'  # Select: 'ConvBlock', 'BasicBlock', 'BottleNeck'
         p['GTmasks'] = 0 # Use GT Vessel Segmentations as input instead of Retinal Images
-        #model_dir = '/scratch_net/boxy/carlesv/HourGlasses_experiments/roads/Iterative_margin_6/'
-        model_dir = '/scratch_net/boxy/carlesv/HourGlasses_experiments/roads/Iterative_margin_6_200_epoches/'
+        model_dir = './results_dir/'
         modelName = tb.construct_name(p, "HourGlass")
         numHGScales = 4  # How many times to downsample inside each HourGlass
         net = nt.Net_SHG(p['numHG'], numHGScales, p['Block'], 128, 1)
-        #epoch = 49
         epoch = 130
         net.load_state_dict(torch.load(os.path.join(model_dir, os.path.join(model_dir, modelName+'_epoch-'+str(epoch)+'.pth')),
                                    map_location=lambda storage, loc: storage))
@@ -177,7 +172,6 @@ def get_most_confident_outputs(img_filename, patch_center_row, patch_center_col,
             mask_graph_skel = skeletonize(mask_graph>0)
             indxs = np.argwhere(mask_graph_skel==1)
             axes[0].scatter(indxs[:,1],indxs[:,0],color='red',marker='+')
-            #axes[0].plot(sources['x_peak']+center[0]-32, sources['y_peak']+center[1]-32, ls='none', color='blue',marker='+', ms=10, lw=1.5)
 
             axes[0].add_patch(patches.Rectangle((x_tmp, y_tmp),patch_size,patch_size,fill=False,color='cyan', linewidth=5))
             img_crop_array = img[y_tmp:y_tmp+patch_size,x_tmp:x_tmp+patch_size,:]
@@ -188,7 +182,6 @@ def get_most_confident_outputs(img_filename, patch_center_row, patch_center_col,
                 if sources['peak_value'][ii] > confident_th:
                     tmp_vector_x.append(sources['x_peak'][ii])
                     tmp_vector_y.append(sources['y_peak'][ii])
-            #axes[1].plot(sources['x_peak'], sources['y_peak'], ls='none', color='red',marker='+', ms=10, lw=1.5)
             axes[1].plot(tmp_vector_x, tmp_vector_y, ls='none', color='red',marker='+', ms=25, markeredgewidth=10)
             axes[1].plot(32, 32, ls='none', color='cyan',marker='+', ms=25, markeredgewidth=10)
             plt.show()
@@ -196,24 +189,15 @@ def get_most_confident_outputs(img_filename, patch_center_row, patch_center_col,
         if visualize_evolution:
 
             if iter < 20 or (iter < 200 and iter % 20 == 0) or iter % 100 == 0:
-        #if ii > 200 and ii % 100 == 0:
-                print(iter)
-                #scipy.misc.imsave('/scratch_net/boxy/carlesv/results/DRIVE/tmp_results/pred_graph_%02d_mask_same_mask_graph_th_30_with_novelty_iter_%05d.png' % (img_idx,ii), mask_graph)
-                #scipy.misc.imsave('/scratch_net/boxy/carlesv/results/DRIVE/tmp_results/pred_graph_%02d_mask_same_mask_graph_th_30_with_novelty_iter_%05d_outputs.png' % (img_idx,ii), mask_outputs)
-                #scipy.misc.imsave('/scratch_net/boxy/carlesv/results/DRIVE/tmp_results/pred_graph_%02d_mask_same_mask_graph_th_30_only_novelty_iter_%05d.png' % (img_idx,ii), mask_graph)
-                #scipy.misc.imsave('/scratch_net/boxy/carlesv/results/DRIVE/tmp_results/pred_graph_%02d_mask_same_mask_graph_th_30_only_novelty_iter_%05d_outputs.png' % (img_idx,ii), mask_outputs)
-                #plt.figure(figsize=(6,6))
+
                 plt.figure(figsize=(12,12), dpi=60)
                 plt.imshow(img.astype(np.uint8))
                 mask_graph_skeleton = skeletonize(mask_graph>0)
-                #indxs = np.argwhere(mask_graph==1)
                 indxs_skel = np.argwhere(mask_graph_skeleton==1)
                 plt.scatter(indxs_skel[:,1],indxs_skel[:,0],color='red',marker='+')
                 plt.axis('off')
                 plt.savefig(directory + 'iter_%05d.png' % iter, bbox_inches='tight')
-                #plt.savefig('/scratch_net/boxy/carlesv/retinal/CVPR2018/figures/roads_evolution/iterative_vessel_01_test_iter_%05d.png' % iter, bbox_inches='tight')
                 plt.close()
-                #plt.show()
 
         indxs = np.argsort(sources['peak_value'])
         for ii in range(0,len(indxs)):
@@ -241,6 +225,8 @@ vgg = True
 
 if visualize_graph or visualize_graph_step_by_step or visualize_evolution or visualize_dense_evolution:
     gpu_id = -1
+else:
+    gpu_id = int(os.environ['SGE_GPU'])  # Select which GPU, -1 if CPU
     
 if gpu_id >= 0:
     torch.cuda.set_device(device=gpu_id)
@@ -254,17 +240,17 @@ for img_idx in range(0,len(test_img_filenames)):
     img_filename = test_img_filenames[img_idx]
 
     if visualize_evolution:
-        directory = '/scratch_net/boxy/carlesv/HourGlasses_experiments/roads/Iterative_margin_6_200_epoches/results_evolution/' + img_filename[0:len(img_filename)-5] + '/'
+        directory = './results_dir/results_evolution/' + img_filename[0:len(img_filename)-5] + '/'
         if not os.path.exists(directory):
             os.makedirs(directory)
 
     if visualize_dense_evolution:
-        directory_dense = '/scratch_net/boxy/carlesv/HourGlasses_experiments/roads/Iterative_margin_6_200_epoches/results_evolution/' + img_filename[0:len(img_filename)-5] + '/dense/'
+        directory_dense = './results_dir/results_evolution/' + img_filename[0:len(img_filename)-5] + '/dense/'
         if not os.path.exists(directory_dense):
             os.makedirs(directory_dense)
 
     if gt_masks:
-        results_dir_vessels = '/scratch_net/boxy/carlesv/gt_dbs/MassachusettsRoads/test/1st_manual/'
+        results_dir_vessels = './gt_dbs/MassachusettsRoads/test/1st_manual/'
         pred = Image.open(results_dir_vessels + img_filename[0:len(img_filename)-1])
         pred = np.array(pred)
         indxs = np.argwhere(pred==255)
@@ -273,10 +259,10 @@ for img_idx in range(0,len(test_img_filenames)):
         start_col = indxs[selected_indx,1]
     else:
         if vgg:
-            results_dir_vessels = '/scratch_net/boxy/kmaninis/road/Results_test_vgg_full-res/'
+            results_dir_vessels = './results_test_vgg/'
             pred = Image.open(results_dir_vessels + img_filename[:-4] + 'png')
         else:
-            results_dir_vessels = '/scratch_net/boxy/kmaninis/road/Old/Results_test_resnet/'
+            results_dir_vessels = './results_test_resnet/'
             pred = Image.open(results_dir_vessels + img_filename)
 
         pred = np.array(pred)
@@ -335,7 +321,6 @@ for img_idx in range(0,len(test_img_filenames)):
 
         parent_map[current_id] = -1
         location_map[current_id] = center
-
 
         offset = 2
         offset_local_mask = 10
@@ -473,7 +458,7 @@ for img_idx in range(0,len(test_img_filenames)):
 
 
         if gt_masks:
-            results_dir_vessels = '/scratch_net/boxy/carlesv/gt_dbs/MassachusettsRoads/test/1st_manual/'
+            results_dir_vessels = './gt_dbs/MassachusettsRoads/test/1st_manual/'
             pred = Image.open(results_dir_vessels + img_filename[0:len(img_filename)-1])
             pred = np.array(pred)
 
@@ -487,10 +472,10 @@ for img_idx in range(0,len(test_img_filenames)):
                 exploring = False
         else:
             if vgg:
-                results_dir_vessels = '/scratch_net/boxy/kmaninis/road/Results_test_vgg_full-res/'
+                results_dir_vessels = './results_test_vgg/'
                 pred = Image.open(results_dir_vessels + img_filename[:-4] + 'png')
             else:
-                results_dir_vessels = '/scratch_net/boxy/kmaninis/road/Old/Results_test_resnet/'
+                results_dir_vessels = '/results_test_resnet/'
                 pred = Image.open(results_dir_vessels + img_filename)
 
             pred = np.array(pred)
@@ -538,10 +523,10 @@ for img_idx in range(0,len(test_img_filenames)):
 
     if save_results:
         if gt_masks:
-            scipy.misc.imsave('/scratch_net/boxy/carlesv/HourGlasses_experiments/roads/Iterative_margin_6/iterative_results_ground_truth/' + img_filename, mask_graph)
+            scipy.misc.imsave('./results_dir/iterative_results_ground_truth/' + img_filename, mask_graph)
         else:
             if vgg:
-                scipy.misc.imsave('/scratch_net/boxy/carlesv/HourGlasses_experiments/roads/Iterative_margin_6/iterative_results_prediction_130_vgg_th_30_local_mask/' + img_filename, mask_graph)
+                scipy.misc.imsave('./results_dir/iterative_results_prediction_vgg/' + img_filename, mask_graph)
             else:
-                scipy.misc.imsave('/scratch_net/boxy/carlesv/HourGlasses_experiments/roads/Iterative_margin_6/iterative_results_prediction_resnet_high_th_40_low_th_10_offset_mask_10/' + img_filename, mask_graph)
+                scipy.misc.imsave('/results_dir/iterative_results_prediction_resnet/' + img_filename, mask_graph)
 
