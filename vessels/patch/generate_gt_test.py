@@ -12,26 +12,29 @@ p['g_size'] = 64  # Higher means narrower Gaussian
 p['GTmasks'] = 0 # Use GT Vessel Segmentations as input instead of Retinal Images
 db_root_dir = '/scratch_net/boxy/carlesv/gt_dbs/DRIVE/'
 resultsOnTraining = False
-junctions = True
+junctions = False
 connected = True
-from_same_vessel = True
-bifurcations_allowed = False
-save_vertices_indxs = False
-load_vertices_indxs = True
+from_same_vessel = False
+bifurcations_allowed = True
+
+#First time, set save_vertices_indxs True and load_vertices_indxs False. If you delete the training patches but keep the file
+#with the vertices indxs, you can create again the same training patches setting save_vertices_indxs False and load_vertices_indxs True.
+save_vertices_indxs = True
+load_vertices_indxs = False
 
 if junctions:
-    save_dir = '/scratch_net/boxy/carlesv/HourGlasses_experiments/Iterative_margin_6/gt_test_junctions/'
+    save_dir = './results_dir_vessels/gt_test_junctions/'
 else:
     if connected:
         if from_same_vessel:
             if bifurcations_allowed:
-                save_dir = '/scratch_net/boxy/carlesv/HourGlasses_experiments/Iterative_margin_6/gt_test_connected_same_vessel/'
+                save_dir = '/results_dir_vessels/gt_test_connected_same_vessel/'
             else:
-                save_dir = '/scratch_net/boxy/carlesv/HourGlasses_experiments/Iterative_margin_6/gt_test_connected_same_vessel_wo_bifurcations/'
+                save_dir = './results_dir_vessels/gt_test_connected_same_vessel_wo_bifurcations/'
         else:
-            save_dir = '/scratch_net/boxy/carlesv/HourGlasses_experiments/Iterative_margin_6/gt_test_connected/'
+            save_dir = './results_dir_vessels/gt_test_connected/'
     else:
-        save_dir = '/scratch_net/boxy/carlesv/HourGlasses_experiments/Iterative_margin_6/gt_test_not_connected/'
+        save_dir = './results_dir_vessels/gt_test_not_connected/'
 
 composed_transforms_test = tb.ToTensor()
 
@@ -45,13 +48,11 @@ num_patches_per_image = 50
 
 if load_vertices_indxs:
     num_images = 20
-    f = open('/scratch_net/boxy/carlesv/gt_dbs/DRIVE/vertices_selected_margin_6.txt','r')
+    f = open('./gt_dbs/DRIVE/vertices_selected.txt','r')
     for jj in range(0,num_patches_per_image):
         for ii in range(0,num_images):
             line = f.readline()
             selected_vertex = int(line.split()[1])
-            #ToDo: Generate img and gt pair from selected vertex (use functions already implemented in bifurcations_toolbox)
-
 
             if not os.path.isfile(save_dir + 'img_%02d_patch_%02d_img.png' %(ii+1,jj+1)):
 
@@ -68,7 +69,6 @@ if load_vertices_indxs:
                 output_points = np.round(output_points) #round intersect points to generate gaussians all centered on pixels
                 if len(output_points) > 1:
                     output_points = np.vstack({tuple(row) for row in output_points}) #remove duplicated values on output_points
-
 
                 gt = tb.make_gt(img_crop, output_points, (patch_size,patch_size), float(p['outputRes'][0]) / p['g_size'])
                 scipy.misc.imsave(save_dir + 'img_%02d_patch_%02d_gt.png' %(ii+1,jj+1), np.squeeze(gt))
