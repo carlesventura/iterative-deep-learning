@@ -4,18 +4,15 @@ import numpy as np
 import networkx as nx
 import scipy.io as sio
 
-#idx = 2
-#idx_patch = 1
-
 def generate_graph(idx, idx_patch):
 
-    results_dir = '/scratch_net/boxy/carlesv/HourGlasses_experiments/Iterative_margin_6/results_DRIU_vessel_segmentation/'
+    results_dir = './results_dir_vessels/results_DRIU_vessel_segmentation/'
     num_images = 20
 
     pred = Image.open(results_dir + '%02d_test.png' %(idx))
     pred = np.array(pred)
 
-    f = open('/scratch_net/boxy/carlesv/gt_dbs/DRIVE/vertices_selected.txt','r')
+    f = open('./gt_dbs/DRIVE/vertices_selected.txt','r')
     count = 0
 
     while count != (idx_patch-1)*num_images + idx-1:
@@ -27,7 +24,7 @@ def generate_graph(idx, idx_patch):
 
     selected_vertex = int(line.split()[1])
 
-    mat_contents = sio.loadmat('/scratch_net/boxy/carlesv/artery-vein/AV-DRIVE/test/%02d_manual1.mat' %idx)
+    mat_contents = sio.loadmat('./gt_dbs/artery-vein/AV-DRIVE/test/%02d_manual1.mat' %idx)
     vertices = np.squeeze(mat_contents['G']['V'][0,0])-1
     center = (vertices[selected_vertex,0], vertices[selected_vertex,1])
 
@@ -79,7 +76,7 @@ def generate_graph(idx, idx_patch):
 
 def generate_graph_center(idx, center):
 
-    results_dir = '/scratch_net/boxy/carlesv/HourGlasses_experiments/Iterative_margin_6/results_DRIU_vessel_segmentation/'
+    results_dir = './results_dir_vessels/results_DRIU_vessel_segmentation/'
 
     pred = Image.open(results_dir + '%02d_test.png' %(idx))
     pred = np.array(pred)
@@ -132,7 +129,7 @@ def generate_graph_center(idx, center):
 
 def generate_graph_center_connectivity4(idx, center):
 
-    results_dir = '/scratch_net/boxy/carlesv/HourGlasses_experiments/Iterative_margin_6/results_DRIU_vessel_segmentation/'
+    results_dir = './results_dir_vessels/results_DRIU_vessel_segmentation/'
 
     pred = Image.open(results_dir + '%02d_test.png' %(idx))
     pred = np.array(pred)
@@ -169,7 +166,7 @@ def generate_graph_center_connectivity4(idx, center):
 
 def generate_graph_center_patch_size(idx, center, patch_size):
 
-    results_dir = '/scratch_net/boxy/carlesv/HourGlasses_experiments/Iterative_margin_6/results_DRIU_vessel_segmentation/'
+    results_dir = './results_dir_vessels/results_DRIU_vessel_segmentation/'
 
     pred = Image.open(results_dir + '%02d_test.png' %(idx))
     pred = np.array(pred)
@@ -221,15 +218,13 @@ def generate_graph_center_patch_size(idx, center, patch_size):
 
 def generate_graph_center_patch_size_min_confidence(idx, center, patch_size, confidence_th):
 
-    results_dir = '/scratch_net/boxy/carlesv/HourGlasses_experiments/Iterative_margin_6/results_DRIU_vessel_segmentation/'
+    results_dir = './results_dir_vessels/results_DRIU_vessel_segmentation/'
 
     pred = Image.open(results_dir + '%02d_test.png' %(idx))
     pred = np.array(pred)
 
     x_tmp = int(center[0]-patch_size/2)
     y_tmp = int(center[1]-patch_size/2)
-
-    #print(np.array([x_tmp, x_tmp+patch_size, y_tmp, y_tmp+patch_size]))
 
     pred = pred[y_tmp:y_tmp+patch_size,x_tmp:x_tmp+patch_size]
 
@@ -304,34 +299,3 @@ def generate_graph_center_patch_size_min_confidence(idx, center, patch_size, con
                 G.add_edge(node_idx,node_bottomright_idx,weight=cost)
 
     return G
-
-# source_row = 28
-# source_col = 61
-# source_idx = source_row*pred.shape[1] + source_col
-#
-# target_row = 31
-# target_col = 31
-# target_idx = target_row*pred.shape[1] + target_col
-#
-# length, path = nx.bidirectional_dijkstra(G,source_idx,target_idx)
-# print(path)
-#
-# plt.imshow(pred)
-# for ii in range(0,len(path)):
-#     node_idx = path[ii]
-#     row_idx = node_idx / pred.shape[1]
-#     col_idx = node_idx % pred.shape[1]
-#     plt.plot(col_idx,row_idx,color='red',marker='+')
-#
-# plt.show()
-
-
-
-
-
-
-
-
-
-
-
