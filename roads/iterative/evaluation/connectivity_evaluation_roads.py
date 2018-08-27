@@ -139,7 +139,7 @@ def build_graph_gt(pred):
 
     return G
 
-def evaluate_connectivity(edges_gt, G_gt, pred, G_pred, visualize_connectivity, visualize_errors):
+def evaluate_connectivity(edges_gt, G_gt, pred, G_pred, visualize_errors):
 
     matching_th = 0.8
     connected = 0
@@ -207,35 +207,6 @@ def evaluate_connectivity(edges_gt, G_gt, pred, G_pred, visualize_connectivity, 
             plt.scatter(pos_x_vector,pos_y_vector,color='green',marker='+')
             plt.show()
 
-
-
-        if visualize_connectivity and ii%10 == 0:
-
-            print(length_pred)
-            print(length_gt)
-            print(float(np.min([length_gt,length_pred]))/np.max([length_gt,length_pred]))
-
-            plt.imshow(pred)
-            pos_y_vector = []
-            pos_x_vector = []
-            for jj in range(0,len(path_pred)):
-                pos_y = path_pred[jj] / pred.shape[1]
-                pos_x = path_pred[jj] % pred.shape[1]
-                pos_y_vector.append(pos_y)
-                pos_x_vector.append(pos_x)
-
-            plt.scatter(pos_x_vector,pos_y_vector,color='red',marker='o')
-
-            pos_y_vector = []
-            pos_x_vector = []
-            for jj in range(0,len(path_gt)):
-                pos_y = path_gt[jj] / pred.shape[1]
-                pos_x = path_gt[jj] % pred.shape[1]
-                pos_y_vector.append(pos_y)
-                pos_x_vector.append(pos_x)
-
-            plt.scatter(pos_x_vector,pos_y_vector,color='green',marker='+')
-            plt.show()
 
     print('connected = ' + str(connected))
     print('total = ' + str(len(edges_gt)))
@@ -359,21 +330,17 @@ def extract_edges_from_gt_annotations(graph_gt_img):
 
     h, w = graph_gt_img.shape[:2]
     junction_idxs = []
-    #plt.imshow(graph_gt_img)
     for ii in range(0,len(junctions[0])):
         junction_row = junctions[0][ii]
         junction_col = junctions[1][ii]
-        #plt.scatter(junction_col,junction_row,color='green',marker='+')
         junction_idx = junction_row*w + junction_col
         junction_idxs.append(junction_idx)
     endpoint_idxs = []
     for ii in range(0,len(endpoints[0])):
         endpoint_row = endpoints[0][ii]
         endpoint_col = endpoints[1][ii]
-        #plt.scatter(endpoint_col,endpoint_row,color='green',marker='o')
         endpoint_idx = endpoint_row*w + endpoint_col
         endpoint_idxs.append(endpoint_idx)
-    #plt.show()
 
     for ii in range(0,len(junctions[0])):
         junction_row = junctions[0][ii]
@@ -574,66 +541,22 @@ def extract_edges_from_gt_annotations(graph_gt_img):
     return edges_gt
 
 
-visualize_connectivity = False
 visualize_errors = False
 
-if visualize_connectivity or visualize_errors:
+if visualize_errors:
     import matplotlib.pyplot as plt
 
-iterative_graph_creation = True
-vgg = True
 
-if iterative_graph_creation:
-    if vgg:
-        #results_dir = '/scratch_net/boxy/carlesv/HourGlasses_experiments/roads/Iterative_margin_6/iterative_results_prediction_vgg_th_20_offset_mask_10/'
-        #results_dir = '/scratch_net/boxy/carlesv/HourGlasses_experiments/roads/Iterative_margin_6/iterative_results_prediction_vgg_width_th_20_offset_mask_10/'
-        #results_dir = '/scratch_net/boxy/carlesv/HourGlasses_experiments/roads/Iterative_margin_6/iterative_results_prediction_vgg_novelty_th_20_offset_mask_10/'
-        #results_dir = '/scratch_net/boxy/carlesv/HourGlasses_experiments/roads/Iterative_margin_6/iterative_results_prediction_vgg_min_conf_50_th_20_offset_mask_10/'
-        #results_dir = '/scratch_net/boxy/carlesv/HourGlasses_experiments/roads/Iterative_margin_6/iterative_results_prediction_vgg_th_30_offset_mask_10/'
-        #results_dir = '/scratch_net/boxy/carlesv/HourGlasses_experiments/roads/Iterative_margin_6/iterative_results_prediction_vgg_th_20_offset_mask_10_debugging_dilated/'
-        #results_dir = '/scratch_net/boxy/carlesv/HourGlasses_experiments/roads/Iterative_margin_6/iterative_results_prediction_130_vgg_high_th_40_low_th_15_offset_mask_10/'
-        #results_dir = '/scratch_net/boxy/carlesv/HourGlasses_experiments/roads/Iterative_margin_6/iterative_results_prediction_130_vgg_high_th_40_low_th_15_offset_mask_10_dilated/'
-        #results_dir = '/scratch_net/boxy/carlesv/HourGlasses_experiments/roads/Iterative_margin_6/iterative_results_prediction_130_vgg_th_20_offset_mask_10/'
-        results_dir = '/scratch_net/boxy/carlesv/HourGlasses_experiments/roads/Iterative_margin_6/iterative_results_prediction_130_vgg_th_30_local_mask_skeleton/'
-
-    else:
-        #results_dir = '/scratch_net/boxy/carlesv/HourGlasses_experiments/roads/Iterative_margin_6/iterative_results_prediction_novelty_dilated/'
-        results_dir = '/scratch_net/boxy/carlesv/HourGlasses_experiments/roads/Iterative_margin_6/iterative_results_prediction_width_offset_mask_10/'
-else: #Road segmentation skeleton
-    if vgg:
-        results_dir = '/scratch_net/boxy/carlesv/HourGlasses_experiments/roads/test_results_vgg_skeletons/th_150/'
-    else:
-        results_dir = '/scratch_net/boxy/carlesv/HourGlasses_experiments/roads/test_results_road_segmentation_skeletons/th_100/'
-
+results_dir = './results_dir/iterative_results_prediction_vgg/'
 
 CRR_all = []
 
-root_dir='/scratch_net/boxy/carlesv/gt_dbs/MassachusettsRoads/test/images/'
+root_dir='./gt_dbs/MassachusettsRoads/test/images/'
 test_img_filenames = os.listdir(root_dir)
 
-if iterative_graph_creation:
-    if vgg:
-        #file = open('/scratch_net/boxy/carlesv/HourGlasses_experiments/roads/Iterative_margin_6/results_connectivity_iterative_vgg_th_20_offset_mask_10.txt', 'a')
-        #file = open('/scratch_net/boxy/carlesv/HourGlasses_experiments/roads/Iterative_margin_6/results_connectivity_iterative_vgg_width_th_20_offset_mask_10.txt', 'a')
-        #file = open('/scratch_net/boxy/carlesv/HourGlasses_experiments/roads/Iterative_margin_6/results_connectivity_iterative_vgg_novelty_th_20_offset_mask_10.txt', 'a')
-        #file = open('/scratch_net/boxy/carlesv/HourGlasses_experiments/roads/Iterative_margin_6/iterative_results_prediction_vgg_min_conf_50_th_20_offset_mask_10.txt', 'a')
-        #file = open('/scratch_net/boxy/carlesv/HourGlasses_experiments/roads/Iterative_margin_6/results_connectivity_iterative_vgg_th_30_offset_mask_10.txt', 'a')
-        #file = open('/scratch_net/boxy/carlesv/HourGlasses_experiments/roads/Iterative_margin_6/results_connectivity_iterative_vgg_th_20_offset_mask_10_debugging_dilated.txt', 'a')
-        #file = open('/scratch_net/boxy/carlesv/HourGlasses_experiments/roads/Iterative_margin_6/results_connectivity_iterative_130_vgg_high_th_40_low_th_15_offset_mask_10.txt', 'a')
-        #file = open('/scratch_net/boxy/carlesv/HourGlasses_experiments/roads/Iterative_margin_6/results_connectivity_iterative_130_vgg_high_th_40_low_th_15_offset_mask_10_dilated.txt', 'a')
-        #file = open('/scratch_net/boxy/carlesv/HourGlasses_experiments/roads/Iterative_margin_6/results_connectivity_iterative_130_vgg_th_20_offset_mask_10.txt', 'a')
-        file = open('/scratch_net/boxy/carlesv/HourGlasses_experiments/roads/Iterative_margin_6/results_connectivity_iterative_130_vgg_th_30_local_mask.txt', 'a')
-    else:
-        #file = open('/scratch_net/boxy/carlesv/HourGlasses_experiments/roads/Iterative_margin_6/results_connectivity_iterative.txt', 'a')
-        file = open('/scratch_net/boxy/carlesv/HourGlasses_experiments/roads/Iterative_margin_6/results_connectivity_iterative_width_offset_mask_10.txt', 'a')
-else:
-    if vgg:
-        file = open('/scratch_net/boxy/carlesv/HourGlasses_experiments/roads/Iterative_margin_6/results_connectivity_vgg_skeleton_th_150.txt', 'a')
-    else:
-        file = open('/scratch_net/boxy/carlesv/HourGlasses_experiments/roads/Iterative_margin_6/results_connectivity_skeleton_th_100.txt', 'a')
+file = open('./results_dir/results_connectivity_iterative_vgg.txt', 'a')
 
 for img_idx in range(0,len(test_img_filenames)):
-
 
     img_filename = test_img_filenames[img_idx]
     img = Image.open(os.path.join(root_dir, img_filename))
@@ -645,13 +568,11 @@ for img_idx in range(0,len(test_img_filenames)):
     pred = np.array(pred)
     G_pred = build_graph(pred)
 
-
     print('Predicted graph built')
-
 
     #Ground truth graph
 
-    gt_dir='/scratch_net/boxy/carlesv/gt_dbs/MassachusettsRoads/test/1st_manual_skeletons/'
+    gt_dir='./gt_dbs/MassachusettsRoads/test/1st_manual_skeletons/'
     graph_gt_img = Image.open(gt_dir + img_filename)
     graph_gt_img = np.array(graph_gt_img)
     graph_gt_img[0,:] = 0
@@ -663,9 +584,8 @@ for img_idx in range(0,len(test_img_filenames)):
 
     print('GT graph built')
 
-
     # Find matching between predicted edges and ground truth edges
-    CRR = evaluate_connectivity(edges_gt, G_gt, pred, G_pred, visualize_connectivity, visualize_errors)
+    CRR = evaluate_connectivity(edges_gt, G_gt, pred, G_pred, visualize_errors)
 
     print(CRR)
     file.write(img_filename + ': gt edges: ' + str(len(edges_gt)) + '\n')
@@ -682,11 +602,4 @@ file.write(str(CRR_all) + '\n')
 file.write(str(np.mean(CRR_all)) + '\n')
 file.flush()
 file.close()
-
-
-
-
-
-
-
 
