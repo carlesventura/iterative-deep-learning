@@ -74,7 +74,7 @@ def make_gt(img, labels, outputRes=None, sigma=10):
 
 
 def txt2mat(idx):
-    annotation_file = '/scratch_net/boxy/carlesv/RetinalFeatures/%02d_manual1_gt.txt' % (idx)
+    annotation_file = './gt_dbs/RetinalFeatures/%02d_manual1_gt.txt' % (idx)
     file = open(annotation_file, 'r')
     lines = file.readlines()
     file.close()
