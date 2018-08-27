@@ -210,7 +210,7 @@ visualize_graph = False
 visualize_graph_step_by_step = False
 visualize_evolution = False
 visualize_dense_evolution = False
-save_results = False
+save_results = True
 
 if visualize_graph or visualize_graph_step_by_step or visualize_evolution or visualize_dense_evolution:
     gpu_id = -1
