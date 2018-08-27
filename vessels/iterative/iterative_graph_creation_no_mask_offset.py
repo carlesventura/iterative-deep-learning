@@ -242,7 +242,6 @@ for img_idx in range(1,21):
     offset_mask = 0
     mask[center[1]-offset_mask:center[1]+offset_mask+1,center[0]-offset_mask:center[0]+offset_mask+1] = 1
 
-    count = 0
     ii = 0
     while len(pending_connections_x) > 0:
         max_idx = np.argmax(confidence_pending_connections)
@@ -261,17 +260,14 @@ for img_idx in range(1,21):
             length, path = nx.bidirectional_dijkstra(G,source_idx,target_idx)
             pos_y_vector = []
             pos_x_vector = []
-            count_mask_graph = 0
             for jj in range(0,len(path)):
                 row_idx = path[jj] / 64
                 col_idx = path[jj] % 64
                 global_x = col_idx+previous_center_x-32
                 global_y = row_idx+previous_center_y-32
-                if mask_graph[global_y,global_x] == 0 or count_mask_graph < 0:
+                if mask_graph[global_y,global_x] == 0:
                     pos_y_vector.append(global_y)
                     pos_x_vector.append(global_x)
-                    if mask_graph[global_y,global_x] == 1:
-                        count_mask_graph += 1
                 else:
                     break
 
@@ -280,8 +276,6 @@ for img_idx in range(1,21):
                 for kk in range(0,len(pos_y_vector)):
                     mask_graph[pos_y_vector[kk]-offset:pos_y_vector[kk]+offset+1,pos_x_vector[kk]-offset:pos_x_vector[kk]+offset+1] = 1
                     mask[pos_y_vector[kk]-offset:pos_y_vector[kk]+offset+1,pos_x_vector[kk]-offset:pos_x_vector[kk]+offset+1] = 1
-                count += 1
-                segments.append(new_segment)
 
             #Do the same but from target (center) to source (connected output)
             target_idx = source_idx
@@ -289,17 +283,14 @@ for img_idx in range(1,21):
             length, path = nx.bidirectional_dijkstra(G,source_idx,target_idx)
             pos_y_vector = []
             pos_x_vector = []
-            count_mask_graph = 0
             for jj in range(0,len(path)):
                 row_idx = path[jj] / 64
                 col_idx = path[jj] % 64
                 global_x = col_idx+previous_center_x-32
                 global_y = row_idx+previous_center_y-32
-                if mask_graph[global_y,global_x] == 0 or count_mask_graph < 0:
+                if mask_graph[global_y,global_x] == 0:
                     pos_y_vector.append(global_y)
                     pos_x_vector.append(global_x)
-                    if mask_graph[global_y,global_x] == 1:
-                        count_mask_graph += 1
                 else:
                     break
 
@@ -307,7 +298,6 @@ for img_idx in range(1,21):
                 for kk in range(0,len(pos_y_vector)):
                     mask_graph[pos_y_vector[kk]-offset:pos_y_vector[kk]+offset+1,pos_x_vector[kk]-offset:pos_x_vector[kk]+offset+1] = 1
                     mask[pos_y_vector[kk]-offset:pos_y_vector[kk]+offset+1,pos_x_vector[kk]-offset:pos_x_vector[kk]+offset+1] = 1
-                count += 1
 
             if visualize_graph:
                 plt.imshow(img)
