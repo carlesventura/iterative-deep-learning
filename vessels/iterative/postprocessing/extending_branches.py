@@ -24,10 +24,6 @@ def skeleton_endpoints(skel):
     # now look through to find the value of 11
     # this returns a mask of the endpoints, but if you just want the coordinates, you could simply return np.where(filtered==11)
 
-    #out = np.zeros_like(skel)
-    #out[np.where(filtered==11)] = 1
-    #return out
-
     return np.where(filtered==11)
 
 def find_connected_points(skel, point, connected_points, depth):
@@ -181,16 +177,10 @@ def find_connected_points_until_junction(skel, point, connected_points, depth):
 
 confidence_th = 100
 
-#results_dir = '/scratch/carlesv/results/DRIVE/Results_iterative_graph_creation_th_25/'
-#results_dir = '/scratch/carlesv/results/DRIVE/Results_iterative_graph_creation/'
-#results_dir = '/scratch/carlesv/results/DRIVE/Results_iterative_graph_creation_no_mask_offset/'
-results_dir = '/scratch/carlesv/results/DRIVE/Results_iterative_graph_creation_no_mask_offset_th_25/'
+results_dir = './results_dir_vessels/results_iterative_graph_creation_no_mask_offset_th_25/'
 
 for img_idx in range(1,21):
 
-    #skel = Image.open(results_dir + 'pred_graph_%02d.png' %(img_idx))
-    #skel = Image.open(results_dir + 'pred_graph_%02d_postprocessed_minval_10_maxdepth_20_confidence_th_040_2nd_step_skeleton.png' %(img_idx))
-    #skel = Image.open(results_dir + 'pred_graph_%02d_mask_graph_dilated_skeleton.png' %(img_idx))
     skel = Image.open(results_dir + 'pred_graph_%02d_mask_graph_offset_2_dilated_skeleton.png' %(img_idx))
     skel = np.array(skel)
     h, w = skel.shape[:2]
@@ -198,7 +188,6 @@ for img_idx in range(1,21):
 
     for ii in range(0,len(skel_endpoints[0])):
 
-        print(str(ii+1) + " / " + str(len(skel_endpoints[0])))
         endpoint_row = skel_endpoints[0][ii]
         endpoint_col = skel_endpoints[1][ii]
         mask_endpoint = np.ones((h,w))
@@ -235,7 +224,6 @@ for img_idx in range(1,21):
         best_candidate_row = endpoint_row
         best_candidate_col = endpoint_col
         while not endbranch_found and dist_high_th < 20:
-            #indxs_dist = np.argwhere(dist_endpoint > dist_low_th and dist_endpoint <= dist_high_th)
             indxs_dist = (dist_endpoint>dist_low_th)*(dist_endpoint<=dist_high_th)
             indxs_dist = np.where(indxs_dist)
             candidates = []
@@ -257,10 +245,6 @@ for img_idx in range(1,21):
                         target_idx = (patch_size/2)*patch_size + (patch_size/2)
                         row_pos = indxs_dist[0][jj]
                         col_pos = indxs_dist[1][jj]
-                        #print('patch_size: ' + str(patch_size))
-                        #print(tmp_center)
-                        #print(row_pos-endpoint_row+(patch_size/2))
-                        #print(col_pos-endpoint_col+(patch_size/2))
                         source_idx = (row_pos-endpoint_row+(patch_size/2))*patch_size + col_pos-endpoint_col+(patch_size/2)
                         length, path = nx.bidirectional_dijkstra(G,source_idx,target_idx)
                         cost_candidates.append(length)
@@ -296,13 +280,9 @@ for img_idx in range(1,21):
                 node_idx = path[jj]
                 row_idx = node_idx / patch_size + endpoint_row-(patch_size/2)
                 col_idx = node_idx % patch_size + endpoint_col-(patch_size/2)
-                #plt.scatter(col_idx,row_idx,color='red')
                 skel[row_idx,col_idx] = 255
 
 
-
-    #scipy.misc.imsave(results_dir + 'pred_graph_%02d_postprocessed_minval_10_maxdepth_20_confidence_th_%03d_2nd_step_extended_branches.png' % (img_idx, confidence_th), skel)
-    #scipy.misc.imsave(results_dir + 'pred_graph_%02d_mask_graph_dilated_skeleton_extended_branches_confidence_th_%03d.png' % (img_idx, confidence_th), skel)
-    scipy.misc.imsave(results_dir + 'pred_graph_%02d_mask_graph_offset_2_dilated_skeleton_extended_branches_confidence_th_%03d.png' % (img_idx, confidence_th), skel)
+    scipy.misc.imsave(results_dir + 'pred_graph_%02d_mask_graph_extended_branches_confidence_th_%03d.png' % (img_idx, confidence_th), skel)
 
 
