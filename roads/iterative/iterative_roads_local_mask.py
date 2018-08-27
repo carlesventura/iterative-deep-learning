@@ -17,19 +17,10 @@ import matplotlib.patches as patches
 import os
 
 
-def generate_graph_center_roads(img_filename, center, gt_masks, vgg):
+def generate_graph_center_roads(img_filename, center):
 
-    if gt_masks:
-        results_dir_vessels = './gt_dbs/MassachusettsRoads/test/1st_manual/'
-        pred = Image.open(results_dir_vessels + img_filename[0:len(img_filename)-1])
-    else:
-        if vgg:
-            results_dir_vessels = './results_test_vgg/'
-            pred = Image.open(results_dir_vessels + img_filename[:-4] + 'png')
-        else:
-            results_dir_vessels = './results_test_resnet/'
-            pred = Image.open(results_dir_vessels + img_filename)
-
+    results_dir_vessels = './results_test_vgg/'
+    pred = Image.open(results_dir_vessels + img_filename[:-4] + 'png')
     pred = np.array(pred)
 
     patch_size = 64
@@ -220,8 +211,6 @@ visualize_graph_step_by_step = False
 visualize_evolution = False
 visualize_dense_evolution = False
 save_results = False
-gt_masks = False
-vgg = True
 
 if visualize_graph or visualize_graph_step_by_step or visualize_evolution or visualize_dense_evolution:
     gpu_id = -1
@@ -249,27 +238,13 @@ for img_idx in range(0,len(test_img_filenames)):
         if not os.path.exists(directory_dense):
             os.makedirs(directory_dense)
 
-    if gt_masks:
-        results_dir_vessels = './gt_dbs/MassachusettsRoads/test/1st_manual/'
-        pred = Image.open(results_dir_vessels + img_filename[0:len(img_filename)-1])
-        pred = np.array(pred)
-        indxs = np.argwhere(pred==255)
-        selected_indx = random.randint(0,len(indxs)-1)
-        start_row = indxs[selected_indx,0]
-        start_col = indxs[selected_indx,1]
-    else:
-        if vgg:
-            results_dir_vessels = './results_test_vgg/'
-            pred = Image.open(results_dir_vessels + img_filename[:-4] + 'png')
-        else:
-            results_dir_vessels = './results_test_resnet/'
-            pred = Image.open(results_dir_vessels + img_filename)
 
-        pred = np.array(pred)
-        indx_max =  np.argmax(pred)
-        start_row = indx_max/pred.shape[1]
-        start_col = indx_max%pred.shape[1]
-
+    results_dir_vessels = './results_test_vgg/'
+    pred = Image.open(results_dir_vessels + img_filename[:-4] + 'png')
+    pred = np.array(pred)
+    indx_max =  np.argmax(pred)
+    start_row = indx_max/pred.shape[1]
+    start_col = indx_max%pred.shape[1]
 
 
     img = Image.open(os.path.join(root_dir, img_filename))
@@ -337,7 +312,7 @@ for img_idx in range(0,len(test_img_filenames)):
                 previous_center_y = parent_connections_y[max_idx]
 
                 tmp_center = (previous_center_x,previous_center_y)
-                G = generate_graph_center_roads(test_img_filenames[img_idx],tmp_center, gt_masks, vgg)
+                G = generate_graph_center_roads(test_img_filenames[img_idx],tmp_center)
 
                 target_idx = 32*64 + 32
                 source_idx = (next_element_y-previous_center_y+32)*64 + next_element_x-previous_center_x+32
@@ -457,39 +432,20 @@ for img_idx in range(0,len(test_img_filenames)):
         dist_from_roads_detected_and_starting_points = (dist_from_roads_detected > 100) * (dist_from_starting_points > 100)
 
 
-        if gt_masks:
-            results_dir_vessels = './gt_dbs/MassachusettsRoads/test/1st_manual/'
-            pred = Image.open(results_dir_vessels + img_filename[0:len(img_filename)-1])
-            pred = np.array(pred)
+        results_dir_vessels = './results_test_vgg/'
+        pred = Image.open(results_dir_vessels + img_filename[:-4] + 'png')
+        pred = np.array(pred)
 
-            tmp_matrix = (dist_from_roads_detected_and_starting_points == True) * (pred==255)
-            indxs = np.argwhere(tmp_matrix==True)
-            if len(indxs) > 0:
-                selected_indx = random.randint(0,len(indxs)-1)
-                start_row = indxs[selected_indx,0]
-                start_col = indxs[selected_indx,1]
-            else:
-                exploring = False
-        else:
-            if vgg:
-                results_dir_vessels = './results_test_vgg/'
-                pred = Image.open(results_dir_vessels + img_filename[:-4] + 'png')
-            else:
-                results_dir_vessels = '/results_test_resnet/'
-                pred = Image.open(results_dir_vessels + img_filename)
+        pred_to_explore = np.zeros(pred.shape)
+        indxs = np.argwhere(dist_from_roads_detected_and_starting_points==True)
+        pred_to_explore[indxs[:,0],indxs[:,1]] = pred[indxs[:,0],indxs[:,1]]
 
-            pred = np.array(pred)
-
-            pred_to_explore = np.zeros(pred.shape)
-            indxs = np.argwhere(dist_from_roads_detected_and_starting_points==True)
-            pred_to_explore[indxs[:,0],indxs[:,1]] = pred[indxs[:,0],indxs[:,1]]
-
-            indx_max =  np.argmax(pred_to_explore)
-            start_row = indx_max/pred.shape[1]
-            start_col = indx_max%pred.shape[1]
-            max_val = pred_to_explore[start_row,start_col]
-            if max_val < 200:
-                exploring = False
+        indx_max =  np.argmax(pred_to_explore)
+        start_row = indx_max/pred.shape[1]
+        start_col = indx_max%pred.shape[1]
+        max_val = pred_to_explore[start_row,start_col]
+        if max_val < 200:
+            exploring = False
 
 
     if visualize_graph:
@@ -522,11 +478,6 @@ for img_idx in range(0,len(test_img_filenames)):
         scipy.misc.imsave(directory_dense + 'last_iter_mask.png', mask_graph)
 
     if save_results:
-        if gt_masks:
-            scipy.misc.imsave('./results_dir/iterative_results_ground_truth/' + img_filename, mask_graph)
-        else:
-            if vgg:
-                scipy.misc.imsave('./results_dir/iterative_results_prediction_vgg/' + img_filename, mask_graph)
-            else:
-                scipy.misc.imsave('/results_dir/iterative_results_prediction_resnet/' + img_filename, mask_graph)
+        scipy.misc.imsave('./results_dir/iterative_results_prediction_vgg/' + img_filename, mask_graph)
+
 
