@@ -25,43 +25,42 @@ p['numHG'] = 2  # Number of Stacked Hourglasses
 p['Block'] = 'ConvBlock'  # Select: 'ConvBlock', 'BasicBlock', 'BottleNeck'
 p['GTmasks'] = 0 # Use GT Vessel Segmentations as input instead of Retinal Images
 
-junctions = True
+junctions = False
 connected = True
-from_same_vessel = True
-bifurcations_allowed = False
+from_same_vessel = False
+bifurcations_allowed = True
 
 # Setting other parameters
 numHGScales = 4  # How many times to downsample inside each HourGlass
 useTest = 1  # See evolution of the test set when training?
 nTestInterval = 10  # Run on test set every nTestInterval iterations
-model_dir = '/scratch_net/boxy/carlesv/HourGlasses_experiments/Iterative_margin_6/'
+model_dir = './results_dir_vessels/'
 gpu_id = int(os.environ['SGE_GPU'])  # Select which GPU, -1 if CPU
-#gpu_id = - 1
 epoch = 1800
 
 if junctions:
     modelName = tb.construct_name(p, "HourGlass-junctions")
-    db_root_dir = '/scratch_net/boxy/carlesv/HourGlasses_experiments/Iterative_margin_6/gt_test_junctions/'
-    output_dir = '/scratch_net/boxy/carlesv/HourGlasses_experiments/Iterative_margin_6/results_junctions/'
+    db_root_dir = './results_dir_vessels/gt_test_junctions/'
+    output_dir = './results_dir_vessels/results_junctions/'
 else:
     if not connected:
         modelName = tb.construct_name(p, "HourGlass")
-        db_root_dir = '/scratch_net/boxy/carlesv/HourGlasses_experiments/Iterative_margin_6/gt_test_not_connected/'
-        output_dir = '/scratch_net/boxy/carlesv/HourGlasses_experiments/Iterative_margin_6/results_not_connected/'
+        db_root_dir = './results_dir_vessels/gt_test_not_connected/'
+        output_dir = './results_dir_vessels/results_not_connected/'
     else:
         if from_same_vessel:
             if bifurcations_allowed:
                 modelName = tb.construct_name(p, "HourGlass-connected-same-vessel")
-                db_root_dir = '/scratch_net/boxy/carlesv/HourGlasses_experiments/Iterative_margin_6/gt_test_connected_same_vessel/'
-                output_dir = '/scratch_net/boxy/carlesv/HourGlasses_experiments/Iterative_margin_6/results_connected_same_vessel/'
+                db_root_dir = './results_dir_vessels/gt_test_connected_same_vessel/'
+                output_dir = './results_dir_vessels/results_connected_same_vessel/'
             else:
                 modelName = tb.construct_name(p, "HourGlass-connected-same-vessel-wo-bifurcations")
-                db_root_dir = '/scratch_net/boxy/carlesv/HourGlasses_experiments/Iterative_margin_6/gt_test_connected_same_vessel_wo_bifurcations/'
-                output_dir = '/scratch_net/boxy/carlesv/HourGlasses_experiments/Iterative_margin_6/results_connected_same_vessel_wo_bifurcations/'
+                db_root_dir = './results_dir_vessels/gt_test_connected_same_vessel_wo_bifurcations/'
+                output_dir = './results_dir_vessels/results_connected_same_vessel_wo_bifurcations/'
         else:
             modelName = tb.construct_name(p, "HourGlass-connected")
-            db_root_dir = '/scratch_net/boxy/carlesv/HourGlasses_experiments/Iterative_margin_6/gt_test_connected/'
-            output_dir = '/scratch_net/boxy/carlesv/HourGlasses_experiments/Iterative_margin_6/results_connected/'
+            db_root_dir = './results_dir_vessels/gt_test_connected/'
+            output_dir = './results_dir_vessels/results_connected/'
 
 # Define the Network and load the pre-trained weights as a CPU tensor
 net = nt.Net_SHG(p['numHG'], numHGScales, p['Block'], 128, 1)
@@ -82,9 +81,6 @@ vis_res = 0
 num_patches_per_image = 50
 num_images = 20
 
-max_values = []
-min_values = []
-
 for jj in range(0,num_patches_per_image):
     for ii in range(0,num_images):
 
@@ -104,9 +100,6 @@ for jj in range(0,num_patches_per_image):
 
         inputs = img / 255 - 0.5
 
-        #gt = Image.open(os.path.join(db_root_dir, 'img_%02d_patch_%02_gt.png' %(ii,jj)))
-        #gt = composed_transforms_test(gt)
-
         # Forward pass of the mini-batch
         inputs = Variable(inputs)
         if gpu_id >= 0:
@@ -114,8 +107,6 @@ for jj in range(0,num_patches_per_image):
 
         output = net.forward(inputs)
         pred = np.squeeze(np.transpose(output[len(output)-1].cpu().data.numpy()[0, :, :, :], (1, 2, 0)))
-        max_values.append(np.max(pred))
-        min_values.append(np.min(pred))
 
         scipy.misc.imsave(output_dir + 'epoch_' + str(epoch) + '/img_%02d_patch_%02d.png' %(ii+1, jj+1), pred)
         np.save(output_dir + 'epoch_' + str(epoch) + '/img_%02d_patch_%02d.npy' %(ii+1, jj+1), pred)
@@ -133,13 +124,4 @@ for jj in range(0,num_patches_per_image):
 
         with open(output_dir + 'epoch_' + str(epoch) + '/img_%02d_patch_%02d.json' %(ii+1, jj+1), 'w') as outfile:
             json.dump(data, outfile)
-
-#print(np.max(max_values))
-#print(np.max(min_values))
-
-np.save(output_dir + 'epoch_' + str(epoch) + '/max_values.npy', max_values)
-np.save(output_dir + 'epoch_' + str(epoch) + '/min_values.npy', min_values)
-
-
-
 
