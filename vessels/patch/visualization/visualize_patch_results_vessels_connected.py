@@ -12,16 +12,11 @@ num_patches = 50
 start_img = 1
 patch_size = 64
 
-#peak_th = 100
-
-gt_base_dir = '/scratch_net/boxy/carlesv/HourGlasses_experiments/Iterative_margin_6/gt_test'
-results_base_dir = '/scratch_net/boxy/carlesv/HourGlasses_experiments/Iterative_margin_6/results'
-
+gt_base_dir = './results_dir/gt_test'
+results_base_dir = './results_dir/results'
 
 idx_patch = 2
 
-
-#for idx in range(1,num_images+1):
 for idx in range(start_img,start_img+num_images):
 
     print(idx)
@@ -46,13 +41,4 @@ for idx in range(start_img,start_img+num_images):
     plt.scatter(pos_x_vector, pos_y_vector, marker='+', color='blue', s=100, linewidths=10)
     plt.axis('off')
     plt.show()
-    #axes[2,config_id].plot(sources['x_peak'], sources['y_peak'], ls='none', color='red',marker='+', ms=10, lw=1.5)
-
-
-
-
-
-
-
-
 
