@@ -65,8 +65,7 @@ def make_gt(img, labels, outputRes=None, sigma=10):
         h, w = outputRes
     else:
         h, w = img.shape
-    # print (h, w, len(labels))
-    #gt = np.zeros((h, w, len(labels)), np.float32)
+
     gt = np.zeros((h, w, 1), np.float32)
 
     for land in range(0, labels.shape[0]):
@@ -106,10 +105,10 @@ def find_output_points(root_dir, save_vertices_indxs, train, img_idx, patch_size
 
     if train:
         img = Image.open(os.path.join(root_dir, 'training', 'images', '%02d_training.tif' %(img_idx)))
-        mat_contents = sio.loadmat('/scratch_net/boxy/carlesv/artery-vein/AV-DRIVE/training/%02d_manual1.mat' %(img_idx))
+        mat_contents = sio.loadmat('./gt_dbs/artery-vein/AV-DRIVE/training/%02d_manual1.mat' %(img_idx))
     else:
         img = Image.open(os.path.join(root_dir, 'test', 'images', '%02d_test.tif' %(img_idx)))
-        mat_contents = sio.loadmat('/scratch_net/boxy/carlesv/artery-vein/AV-DRIVE/test/%02d_manual1.mat' %(img_idx))
+        mat_contents = sio.loadmat('./gt_dbs/artery-vein/AV-DRIVE/test/%02d_manual1.mat' %(img_idx))
 
     img = np.array(img, dtype=np.float32)
     h, w = img.shape[:2]
@@ -136,7 +135,6 @@ def find_output_points(root_dir, save_vertices_indxs, train, img_idx, patch_size
     if input_on_left_rotated:
         #Find previous connected vertex
         edges = np.array(graph['E'])
-        #print(edges[0,0][424,1023])
         subset_edges = edges[0,0][selected_vertex,:]
         subset_vertices = np.argwhere(subset_edges)
         subset_vertices = subset_vertices[:,1]
@@ -195,20 +193,6 @@ def find_output_points(root_dir, save_vertices_indxs, train, img_idx, patch_size
         output_points = np.asarray(intersect_points)
         xy = [x_tmp, y_tmp]
         output_points = output_points - xy
-
-        # plt.figure()
-        # plt.imshow(Image.fromarray(np.uint8(img_crop)))
-        # plt.plot(output_points[:,0], output_points[:,1], ls='none', color='blue',marker='+', ms=10, lw=1.5)
-        #
-        # subscripts = np.squeeze(mat_contents['G']['subscripts'][0,0])
-        # for ii in range(0,len(subscripts)):
-        #     segment = LineString([vertices[subscripts[ii,0]-1], vertices[subscripts[ii,1]-1]])
-        #     xcoords, ycoords = segment.xy
-        #     plt.plot(xcoords-np.asarray(x_tmp), ycoords-np.asarray(y_tmp), color='green', alpha=0.5, linewidth=1, solid_capstyle='round', zorder=2)
-        #
-        # plt.xlim([0, patch_size-1])
-        # plt.ylim([patch_size-1,0])
-        # plt.show(block=False)
 
     return img_crop, output_points
 
@@ -216,10 +200,10 @@ def find_output_points_selected_vertex(root_dir, selected_vertex, train, img_idx
 
     if train:
         img = Image.open(os.path.join(root_dir, 'training', 'images', '%02d_training.tif' %(img_idx)))
-        mat_contents = sio.loadmat('/scratch_net/boxy/carlesv/artery-vein/AV-DRIVE/training/%02d_manual1.mat' %(img_idx))
+        mat_contents = sio.loadmat('./gt_dbs/artery-vein/AV-DRIVE/training/%02d_manual1.mat' %(img_idx))
     else:
         img = Image.open(os.path.join(root_dir, 'test', 'images', '%02d_test.tif' %(img_idx)))
-        mat_contents = sio.loadmat('/scratch_net/boxy/carlesv/artery-vein/AV-DRIVE/test/%02d_manual1.mat' %(img_idx))
+        mat_contents = sio.loadmat('./gt_dbs/artery-vein/AV-DRIVE/test/%02d_manual1.mat' %(img_idx))
 
     img = np.array(img, dtype=np.float32)
     h, w = img.shape[:2]
@@ -296,30 +280,16 @@ def find_output_points_selected_vertex(root_dir, selected_vertex, train, img_idx
         xy = [x_tmp, y_tmp]
         output_points = output_points - xy
 
-        # plt.figure()
-        # plt.imshow(Image.fromarray(np.uint8(img_crop)))
-        # plt.plot(output_points[:,0], output_points[:,1], ls='none', color='blue',marker='+', ms=10, lw=1.5)
-        #
-        # subscripts = np.squeeze(mat_contents['G']['subscripts'][0,0])
-        # for ii in range(0,len(subscripts)):
-        #     segment = LineString([vertices[subscripts[ii,0]-1], vertices[subscripts[ii,1]-1]])
-        #     xcoords, ycoords = segment.xy
-        #     plt.plot(xcoords-np.asarray(x_tmp), ycoords-np.asarray(y_tmp), color='green', alpha=0.5, linewidth=1, solid_capstyle='round', zorder=2)
-        #
-        # plt.xlim([0, patch_size-1])
-        # plt.ylim([patch_size-1,0])
-        # plt.show(block=False)
-
     return img_crop, output_points
 
 def find_output_connected_points(root_dir, save_vertices_indxs, train, img_idx, patch_size, from_same_vessel, bifurcations_allowed):
 
     if train:
         img = Image.open(os.path.join(root_dir, 'training', 'images', '%02d_training.tif' %(img_idx)))
-        mat_contents = sio.loadmat('/scratch_net/boxy/carlesv/artery-vein/AV-DRIVE/training/%02d_manual1.mat' %(img_idx))
+        mat_contents = sio.loadmat('./gt_dbs/artery-vein/AV-DRIVE/training/%02d_manual1.mat' %(img_idx))
     else:
         img = Image.open(os.path.join(root_dir, 'test', 'images', '%02d_test.tif' %(img_idx)))
-        mat_contents = sio.loadmat('/scratch_net/boxy/carlesv/artery-vein/AV-DRIVE/test/%02d_manual1.mat' %(img_idx))
+        mat_contents = sio.loadmat('./gt_dbs/artery-vein/AV-DRIVE/test/%02d_manual1.mat' %(img_idx))
 
     img = np.array(img, dtype=np.float32)
     h, w = img.shape[:2]
@@ -365,30 +335,16 @@ def find_output_connected_points(root_dir, save_vertices_indxs, train, img_idx, 
     if output_points.shape[0] > 0:
         output_points = output_points - xy
 
-    # plt.figure()
-    # plt.imshow(Image.fromarray(np.uint8(img_crop)))
-    # plt.plot(output_points[:,0], output_points[:,1], ls='none', color='blue',marker='+', ms=10, lw=1.5)
-    #
-    # subscripts = np.squeeze(mat_contents['G']['subscripts'][0,0])
-    # for ii in range(0,len(subscripts)):
-    #     segment = LineString([vertices[subscripts[ii,0]-1], vertices[subscripts[ii,1]-1]])
-    #     xcoords, ycoords = segment.xy
-    #     plt.plot(xcoords-np.asarray(x_tmp), ycoords-np.asarray(y_tmp), color='green', alpha=0.5, linewidth=1, solid_capstyle='round', zorder=2)
-    #
-    # plt.xlim([0, patch_size-1])
-    # plt.ylim([patch_size-1,0])
-    # plt.show(block=False)
-
     return img_crop, output_points
 
 def find_output_connected_points_selected_vertex(root_dir, selected_vertex, train, img_idx, patch_size, from_same_vessel, bifurcations_allowed):
 
     if train:
         img = Image.open(os.path.join(root_dir, 'training', 'images', '%02d_training.tif' %(img_idx)))
-        mat_contents = sio.loadmat('/scratch_net/boxy/carlesv/artery-vein/AV-DRIVE/training/%02d_manual1.mat' %(img_idx))
+        mat_contents = sio.loadmat('/gt_dbs/artery-vein/AV-DRIVE/training/%02d_manual1.mat' %(img_idx))
     else:
         img = Image.open(os.path.join(root_dir, 'test', 'images', '%02d_test.tif' %(img_idx)))
-        mat_contents = sio.loadmat('/scratch_net/boxy/carlesv/artery-vein/AV-DRIVE/test/%02d_manual1.mat' %(img_idx))
+        mat_contents = sio.loadmat('./gt_dbs/artery-vein/AV-DRIVE/test/%02d_manual1.mat' %(img_idx))
 
     img = np.array(img, dtype=np.float32)
     h, w = img.shape[:2]
@@ -423,20 +379,6 @@ def find_output_connected_points_selected_vertex(root_dir, selected_vertex, trai
     xy = [x_tmp, y_tmp]
     if output_points.shape[0] > 0:
         output_points = output_points - xy
-
-    # plt.figure()
-    # plt.imshow(Image.fromarray(np.uint8(img_crop)))
-    # plt.plot(output_points[:,0], output_points[:,1], ls='none', color='blue',marker='+', ms=10, lw=1.5)
-    #
-    # subscripts = np.squeeze(mat_contents['G']['subscripts'][0,0])
-    # for ii in range(0,len(subscripts)):
-    #     segment = LineString([vertices[subscripts[ii,0]-1], vertices[subscripts[ii,1]-1]])
-    #     xcoords, ycoords = segment.xy
-    #     plt.plot(xcoords-np.asarray(x_tmp), ycoords-np.asarray(y_tmp), color='green', alpha=0.5, linewidth=1, solid_capstyle='round', zorder=2)
-    #
-    # plt.xlim([0, patch_size-1])
-    # plt.ylim([patch_size-1,0])
-    # plt.show(block=False)
 
     return img_crop, output_points
 
@@ -445,10 +387,10 @@ def find_junctions(root_dir, save_vertices_indxs, train, img_idx, patch_size):
 
     if train:
         img = Image.open(os.path.join(root_dir, 'training', 'images', '%02d_training.tif' %(img_idx)))
-        mat_contents = sio.loadmat('/scratch_net/boxy/carlesv/artery-vein/AV-DRIVE/training/%02d_manual1.mat' %(img_idx))
+        mat_contents = sio.loadmat('./gt_dbs/artery-vein/AV-DRIVE/training/%02d_manual1.mat' %(img_idx))
     else:
         img = Image.open(os.path.join(root_dir, 'test', 'images', '%02d_test.tif' %(img_idx)))
-        mat_contents = sio.loadmat('/scratch_net/boxy/carlesv/artery-vein/AV-DRIVE/test/%02d_manual1.mat' %(img_idx))
+        mat_contents = sio.loadmat('./gt_dbs/artery-vein/AV-DRIVE/test/%02d_manual1.mat' %(img_idx))
 
     img = np.array(img, dtype=np.float32)
     h, w = img.shape[:2]
@@ -490,10 +432,10 @@ def find_junctions_selected_vertex(root_dir, selected_vertex, train, img_idx, pa
 
     if train:
         img = Image.open(os.path.join(root_dir, 'training', 'images', '%02d_training.tif' %(img_idx)))
-        mat_contents = sio.loadmat('/scratch_net/boxy/carlesv/artery-vein/AV-DRIVE/training/%02d_manual1.mat' %(img_idx))
+        mat_contents = sio.loadmat('./gt_dbs/artery-vein/AV-DRIVE/training/%02d_manual1.mat' %(img_idx))
     else:
         img = Image.open(os.path.join(root_dir, 'test', 'images', '%02d_test.tif' %(img_idx)))
-        mat_contents = sio.loadmat('/scratch_net/boxy/carlesv/artery-vein/AV-DRIVE/test/%02d_manual1.mat' %(img_idx))
+        mat_contents = sio.loadmat('./gt_dbs/artery-vein/AV-DRIVE/test/%02d_manual1.mat' %(img_idx))
 
     img = np.array(img, dtype=np.float32)
     h, w = img.shape[:2]
@@ -525,11 +467,11 @@ class ToolDataset(Dataset):
                  inputRes=(64, 64),
                  outputRes=(64, 64),
                  sigma=5,
-                 db_root_dir='/scratch_net/boxy/carlesv/gt_dbs/DRIVE/',
+                 db_root_dir='./gt_dbs/DRIVE/',
                  transform=None,
                  gt_masks=0,
                  junctions=False,
-                 connected=False,
+                 connected=True,
                  from_same_vessel=False,
                  bifurcations_allowed=True,
                  save_vertices_indxs=False):
@@ -598,12 +540,8 @@ class ToolDataset(Dataset):
                 output_points = np.round(output_points) #round intersect points to generate gaussians all centered on pixels
                 if len(output_points) > 1:
                     output_points = np.vstack({tuple(row) for row in output_points}) #remove duplicated values on output_points
-                #print(output_points)
 
                 gt = make_gt(img_crop, output_points, (patch_size,patch_size), self.sigma)
-                #scipy.misc.imsave('/scratch_net/boxy/carlesv/HourGlasses_experiments/tmp_image.png', img_crop)
-                #scipy.misc.imsave('/scratch_net/boxy/carlesv/HourGlasses_experiments/tmp_gt.png', np.squeeze(gt))
-
                 return img_crop, gt
             else:
                 img = Image.open(os.path.join(self.db_root_dir, 'training', '1st_manual', '%02d_manual1.gif' %(self.img_list[idx])))
@@ -755,5 +693,4 @@ if __name__ == 'main':
             break
 
     b = a[153]
-    #plt.imshow(b['image'])
-    #plt.imshow(b['gt'])
+
