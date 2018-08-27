@@ -234,18 +234,18 @@ def get_most_confident_outputs(img_filename, patch_center_row, patch_center_col,
 visualize_graph = False
 visualize_graph_step_by_step = False
 visualize_evolution = False
-visualize_dense_evolution = True
+visualize_dense_evolution = False
 save_results = False
 gt_masks = False
 vgg = True
 
-#gpu_id = int(os.environ['SGE_GPU'])  # Select which GPU, -1 if CPU
-gpu_id = -1
+if visualize_graph or visualize_graph_step_by_step or visualize_evolution or visualize_dense_evolution:
+    gpu_id = -1
+    
 if gpu_id >= 0:
     torch.cuda.set_device(device=gpu_id)
 
-
-root_dir='/scratch_net/boxy/carlesv/gt_dbs/MassachusettsRoads/test/images/'
+root_dir='./gt_dbs/MassachusettsRoads/test/images/'
 test_img_filenames = os.listdir(root_dir)
 
 
