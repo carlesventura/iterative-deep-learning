@@ -8,12 +8,15 @@ from scipy.optimize import linear_sum_assignment
 from scipy.cluster.hierarchy import fcluster, linkage
 from astropy.table import Table
 
+base_dir = './results_dir/'
+gt_dir = base_dir + '/val_gt/'
+results_dir = base_dir + '/val_results/'
+
 see_plots = False
 dist_th = 20
 num_images = 14
 num_patches = 50
 start_img = 1
-#epoch = 49
 epoch = 130
 
 save_results = True
@@ -51,13 +54,6 @@ def valid_sources(sources):
     return clustered_sources
 
 
-gt_dir = '/scratch_net/boxy/carlesv/HourGlasses_experiments/roads/Iterative_margin_6/val_gt/'
-#results_dir = '/scratch_net/boxy/carlesv/HourGlasses_experiments/roads/Iterative_margin_6/val_results/'
-results_dir = '/scratch_net/boxy/carlesv/HourGlasses_experiments/roads/Iterative_margin_6_200_epoches/val_results/epoch_130/'
-
-#precision_all = np.zeros((num_images*num_patches,254),np.float32)
-#recall_all = np.zeros((num_images*num_patches,254),np.float32)
-
 low_peak_th = 1
 high_peak_th = 255
 
@@ -66,39 +62,22 @@ recall_all = np.zeros((num_images*num_patches,high_peak_th-low_peak_th),np.float
 
 count_no_points_gt = 0
 
-#for idx in range(1,num_images+1):
 for idx in range(start_img,start_img+num_images):
-    print(idx)
     for idx_patch in range(1,num_patches+1):
 
-
         retina_img = Image.open(gt_dir + 'img_%02d_patch_%02d_img.png' %(idx, idx_patch))
-        #img = Image.open(results_dir + 'epoch_1800/img_%02d_patch_%02d.png' %(idx, idx_patch))
-
         pred = np.load(results_dir + 'img_%02d_patch_%02d.npy' %(idx, idx_patch))
-
 
         if see_plots and idx_patch==1:
             fig, axes = plt.subplots(2, 2)
             axes[0,0].imshow(retina_img)
-            #plt.imshow(img)
-            #plt.show(block=False)
 
-        #mean, median, std = sigma_clipped_stats(img, sigma=3.0)
         mean, median, std = sigma_clipped_stats(pred, sigma=3.0)
         threshold = median + (10.0 * std)
-        #sources = find_peaks(np.array(img), threshold, box_size=3)
         sources = find_peaks(pred, threshold, box_size=3)
-
-
 
         positions = (sources['x_peak'], sources['y_peak'])
         if see_plots and idx_patch==1:
-            #plt.figure()
-            #plt.imshow(img)
-            #plt.plot(sources['x_peak'], sources['y_peak'], ls='none', color='red',marker='+', ms=10, lw=1.5)
-            #plt.show(block=False)
-            #axes[0,1].imshow(img)
             axes[0,1].imshow(pred, interpolation='nearest')
             axes[0,1].plot(sources['x_peak'], sources['y_peak'], ls='none', color='red',marker='+', ms=10, lw=1.5)
 
@@ -116,7 +95,6 @@ for idx in range(start_img,start_img+num_images):
                 sources_gt = valid_sources(sources_gt)
             gt_points = (sources_gt['x_peak'], sources_gt['y_peak'])
 
-        #for peak_th in range(1,255):
         for peak_th in range(low_peak_th,high_peak_th):
 
             valid_peaks = sources[sources['peak_value'] > peak_th]
@@ -143,13 +121,6 @@ for idx in range(start_img,start_img+num_images):
                             true_positives += 1
 
                 if see_plots and peak_th == low_peak_th and idx_patch==1:
-                    #plt.figure()
-                    #plt.plot(gt_points[:,0], gt_points[:,1], ls='none', color='green',marker='+', ms=10, lw=1.5)
-                    #plt.plot(positions[0], positions[1], ls='none', color='red',marker='o', ms=10, lw=1.5, mfc='none')
-                    #for i in range(0,len(row_ind)):
-                    #    if cost[row_ind[i],col_ind[i]] < 1000:
-                    #        plt.plot([positions[0][row_ind[i]], gt_points[col_ind[i],0]], [positions[1][row_ind[i]], gt_points[col_ind[i],1]],color='blue')
-                    #plt.show(block=False)
                     axes[1,0].imshow(gt_img)
                     axes[1,0].plot(gt_points[0], gt_points[1], ls='none', color='green',marker='o', ms=10, lw=1.5, mfc='none')
                     axes[1,0].plot(positions[0], positions[1], ls='none', color='red',marker='+', ms=10, lw=1.5)
@@ -167,14 +138,10 @@ for idx in range(start_img,start_img+num_images):
 
                 recall = float(true_positives) / len(gt_points[0])
 
-                #precision_all[idx-1,peak_th-10] = precision
-                #recall_all[idx-1,peak_th-10] = recall
-
                 precision_all[(idx-start_img)*num_patches+idx_patch-1,peak_th-low_peak_th] = precision
                 recall_all[(idx-start_img)*num_patches+idx_patch-1,peak_th-low_peak_th] = recall
 
                 if see_plots and peak_th == (high_peak_th-1) and idx_patch==1:
-                    #axes[1,1].plot(recall_all[idx-1,:],precision_all[idx-1,:])
                     axes[1,1].plot(recall_all[(idx-start_img)*num_patches+idx_patch-1,:],precision_all[(idx-start_img)*num_patches+idx_patch-1,:])
                     axes[1,1].set_xlim([0,1])
                     axes[1,1].set_ylim([0,1])
@@ -202,7 +169,6 @@ for idx in range(start_img,start_img+num_images):
                 recall_all[(idx-start_img)*num_patches+idx_patch-1,peak_th-low_peak_th] = recall
 
                 if see_plots and peak_th == (high_peak_th-1) and idx_patch==1:
-                    #axes[1,1].plot(recall_all[idx-1,:],precision_all[idx-1,:])
                     axes[1,1].plot(recall_all[(idx-start_img)*num_patches+idx_patch-1,:],precision_all[(idx-start_img)*num_patches+idx_patch-1,:])
                     axes[1,1].set_xlim([0,1])
                     axes[1,1].set_ylim([0,1])
@@ -241,8 +207,7 @@ plt.show()
 
 if save_results:
 
-    #output_file = '/scratch_net/boxy/carlesv/HourGlasses_experiments/roads/Iterative_margin_6/val_PR_results.npz'
-    output_file = '/scratch_net/boxy/carlesv/HourGlasses_experiments/roads/Iterative_margin_6_200_epoches/val_PR_results_epoch_130.npz'
+    output_file = base_dir + '/val_PR_results_epoch_130.npz'
     np.savez(output_file, recall_overall=recall_overall, precision_overall=precision_overall, recall_F_max=recall_F_max, precision_F_max=precision_F_max )
 
 
