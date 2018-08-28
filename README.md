@@ -2,9 +2,9 @@
 
 Published at BMVC 2018.
 
-Code instructions
+## Code instructions
 
-Downloading datasets:
+### Downloading datasets:
 
 Download Massachusetts Roads Dataset from website: https://www.cs.toronto.edu/~vmnih/data/
 
@@ -14,7 +14,7 @@ Download graph annotations for DRIVE dataset from website: http://people.duke.ed
 
 Set your work directory, create a directory inside named gt_dbs and copy there the downloaded datasets (roads dataset in a folder named MassachusettsRoads, DRIVE dataset in a folder named DRIVE and graph annotations for DRIVE in a folder named artery-vein).
 
-Experiments for road topology extraction:
+### Experiments for road topology extraction:
 
 1. Generate road patches for training the patch-level model: roads/patch/generate_gt_val_roads.py
 2. Train patch-level model: roads/patch/train_road_patches.py
@@ -22,7 +22,7 @@ Experiments for road topology extraction:
 4. Apply the patch-level model iteratively over the road test images: roads/iterative/iterative_graph_creation_roads.py
 5. (Optional) Evaluate iterative results: roads/iterative/evaluation/connectivity_evaluation_roads.py
 
-Experiments for vessel topology extraction:
+### Experiments for vessel topology extraction:
 
 1. Train patch-level model: vessels/patch/train_hg.py
 2. (Optional) Evaluate patch-level model: vessels/patch/evaluation/PR_evaluation.py
