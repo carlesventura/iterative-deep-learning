@@ -156,7 +156,6 @@ for img_idx in range(1,21):
     mask[center[1]-offset_mask:center[1]+offset_mask+1,center[0]-offset_mask:center[0]+offset_mask+1] = 1
     mask_outputs[center[1]-offset_mask:center[1]+offset_mask+1,center[0]-offset_mask:center[0]+offset_mask+1] = 1
 
-    count = 0
     ii = 0
     while len(pending_connections_x) > 0:
         max_idx = np.argmax(confidence_pending_connections)
@@ -188,14 +187,11 @@ for img_idx in range(1,21):
 
 
             if len(pos_y_vector) > 0:
-                new_segment = []
 
                 for kk in range(0,len(pos_y_vector)):
                     mask_graph[pos_y_vector[kk]-offset:pos_y_vector[kk]+offset+1,pos_x_vector[kk]-offset:pos_x_vector[kk]+offset+1] = 1
                     mask[pos_y_vector[kk]-offset:pos_y_vector[kk]+offset+1,pos_x_vector[kk]-offset:pos_x_vector[kk]+offset+1] = 1
                     mask_iter[pos_y_vector[kk]-offset:pos_y_vector[kk]+offset+1,pos_x_vector[kk]-offset:pos_x_vector[kk]+offset+1] = ii
-
-                count += 1
 
 
             #Do the same but from target (center) to source (connected output)
@@ -216,14 +212,11 @@ for img_idx in range(1,21):
                     break
 
             if len(pos_y_vector) > 0:
-                new_segment = []
 
                 for kk in range(0,len(pos_y_vector)):
                     mask_graph[pos_y_vector[kk]-offset:pos_y_vector[kk]+offset+1,pos_x_vector[kk]-offset:pos_x_vector[kk]+offset+1] = 1
                     mask[pos_y_vector[kk]-offset:pos_y_vector[kk]+offset+1,pos_x_vector[kk]-offset:pos_x_vector[kk]+offset+1] = 1
                     mask_iter[pos_y_vector[kk]-offset:pos_y_vector[kk]+offset+1,pos_x_vector[kk]-offset:pos_x_vector[kk]+offset+1] = ii
-
-                count += 1
 
 
         plt.imshow(img)
