@@ -19,7 +19,7 @@ Set your work directory, create a directory inside named gt_dbs and copy there t
 1. Generate road patches for training the patch-level model: [roads/patch/generate_gt_val_roads.py](roads/patch/generate_gt_val_roads.py)
 2. Train patch-level model: [roads/patch/train_road_patches.py](roads/patch/train_road_patches.py)
 3. (Optional) Evaluate patch-level model: [roads/patch/evaluation/PR_evaluation_patch_roads.py](roads/patch/evaluation/PR_evaluation_patch_roads.py)
-4. Apply the patch-level model iteratively over the road test images: [roads/iterative/iterative_graph_creation_roads.py](roads/iterative/iterative_graph_creation_roads.py)
+4. Apply the patch-level model iteratively over the road test images: [roads/iterative/iterative_roads_local_mask.py](roads/iterative/iterative_roads_local_mask.py)
 5. (Optional) Evaluate iterative results: [roads/iterative/evaluation/connectivity_evaluation_roads.py](roads/iterative/evaluation/connectivity_evaluation_roads.py)
 
 ### Experiments for vessel topology extraction:
