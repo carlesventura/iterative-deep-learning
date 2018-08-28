@@ -26,5 +26,5 @@ Set your work directory, create a directory inside named gt_dbs and copy there t
 
 1. Train patch-level model: [vessels/patch/train_hg.py](vessels/patch/train_hg.py)
 2. (Optional) Evaluate patch-level model: [vessels/patch/evaluation/PR_evaluation.py](vessels/patch/evaluation/PR_evaluation.py)
-3. Apply the patch-level model iteratively over the retina test images: [vessels/iterative/iterative_graph_creation.py](vessels/iterative/iterative_graph_creation.py)
+3. Apply the patch-level model iteratively over the retina test images: [vessels/iterative/iterative_graph_creation_no_mask_offset.py](vessels/iterative/iterative_graph_creation_no_mask_offset.py)
 4. (Optional) Evaluate iterative results: [vessels/iterative/evaluation/connectivity_evaluation.py](vessels/iterative/evaluation/connectivity_evaluation.py)
