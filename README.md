@@ -7,7 +7,9 @@ Code instructions
 Downloading datasets:
 
 Download Massachusetts Roads Dataset from website: https://www.cs.toronto.edu/~vmnih/data/
+
 Download DRIVE dataset (vessels from retina images) from website: https://www.isi.uu.nl/Research/Databases/DRIVE/
+
 Download graph annotations for DRIVE dataset from website: http://people.duke.edu/~sf59/Estrada_TMI_2015_dataset.htm
 
 Set your work directory, create a directory inside named gt_dbs and copy there the downloaded datasets (roads dataset in a folder named MassachusettsRoads, DRIVE dataset in a folder named DRIVE and graph annotations for DRIVE in a folder named artery-vein).
