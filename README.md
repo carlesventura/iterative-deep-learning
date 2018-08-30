@@ -1,6 +1,8 @@
 # Iterative Deep Learning for Road Topology Extraction
 
 Published at BMVC 2018.
+Paper available on ArXiv: https://arxiv.org/abs/1808.09814
+Paper website: https://carlesventura.github.io/iterative-dl-road-website/
 
 ## Code instructions
 
